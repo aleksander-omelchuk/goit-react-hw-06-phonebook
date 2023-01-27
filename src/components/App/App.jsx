@@ -1,26 +1,21 @@
-import { useSelector } from 'react-redux';
-import { getContacts } from 'redux/contacts-slice';
-import Container from 'components/Container';
-import Header from 'components/Header';
+import ContactForm from 'components/ContactForm';
 import ContactList from 'components/ContactList';
 import Filter from 'components/Filter';
-import Message from 'components/Message';
+import Section from 'components/Section';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-function App() {
-  const contacts = useSelector(getContacts);
-
+export default function App() {
   return (
     <>
-      <Container>
-        <Header />
-      </Container>
-
-      <Container title="Contacts">
+      <Section title="Phonebook">
+        <ContactForm />
+      </Section>
+      <Section title="Contacts">
         <Filter />
-        {contacts.length > 0 ? <ContactList /> : <Message />}
-      </Container>
+        <ContactList />
+      </Section>
+      <ToastContainer theme="colored" autoClose={3000} />
     </>
   );
 }
-
-export default App;

@@ -1,71 +1,60 @@
-import { useState } from 'react';
-import { Label, Title, Input, Button } from './ContactForm.styled';
-import { Report } from 'notiflix/build/notiflix-report-aio';
-import { nanoid } from 'nanoid';
 import { useSelector, useDispatch } from 'react-redux';
-import { addContact, getContacts } from 'redux/contacts-slice';
+import { addContact } from 'redux/contactsSlice';
+import { nanoid } from 'nanoid';
+import { toast } from 'react-toastify';
+import { Form, Label, Span, Input, Button } from './ContactForm.styled';
+import { selectContacts } from 'redux/selectors';
 
-function ContactForm({ onClose }) {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
-
-  const onChangeName = e => setName(e.currentTarget.value);
-  const onChangeNunber = e => setNumber(e.currentTarget.value);
-
-  const contacts = useSelector(getContacts);
+export default function ContactForm() {
+  const contacts = useSelector(selectContacts);
   const dispatch = useDispatch();
 
-  const onSubmitForm = e => {
-    e.preventDefault();
+  const handleSubmit = evt => {
+    evt.preventDefault();
 
-    const newElement = { id: nanoid(), name, number };
+    const { name, number } = evt.target;
 
-    contacts.some(contact => contact.name === name)
-      ? Report.warning(
-          `${name}`,
-          'This user is already in the contact list.',
-          'OK',
-        )
-      : dispatch(addContact(newElement));
+    if (contacts.find(contact => contact.name === name.value)) {
+      return toast.error(`Sorry, ${name.value} is already in contacts.`);
+    }
 
-    reset();
-    onClose();
-  };
+    if (contacts.find(contact => contact.number === number.value)) {
+      return toast.error(`Sorry, ${number.value} is already in contacts.`);
+    }
 
-  const reset = () => {
-    setName('');
-    setNumber('');
+    const newFriend = {
+      id: nanoid(),
+      name: name.value,
+      number: number.value,
+    };
+
+    dispatch(addContact(newFriend));
+    evt.target.reset();
   };
 
   return (
-    <form onSubmit={onSubmitForm}>
+    <Form onSubmit={handleSubmit}>
       <Label>
-        <Title>Name</Title>
+        <Span>Name</Span>
         <Input
-          onChange={onChangeName}
           type="text"
           name="name"
-          value={name}
           pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
           title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
           required
         />
       </Label>
       <Label>
-        <Title>Number</Title>
+        <Span>Number</Span>
         <Input
-          onChange={onChangeNunber}
           type="tel"
           name="number"
-          value={number}
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
           required
         />
       </Label>
       <Button type="submit">Add contact</Button>
-    </form>
+    </Form>
   );
 }
-
-export default ContactForm;
